@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulatore Terna - Sinistro 02-26-API25</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;background:#f8f7f4;line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding:24px 20px}
+h1{font-size:20px;font-weight:600;color:#1F4E79;margin-bottom:4px}
+.sub{font-size:13px;color:#888;margin-bottom:24px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid #ddd;margin-bottom:24px}
+.tab{padding:10px 18px;font-size:14px;font-weight:500;cursor:pointer;border:none;background:none;color:#888;border-bottom:2px solid transparent;transition:all .15s}
+.tab.active{color:#1F4E79;border-bottom-color:#534AB7}
+.tab:hover{color:#1F4E79}
+.panel{display:none}
+.panel.active{display:block}
+.row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.ctrl{flex:1;min-width:170px}
+.ctrl label{display:block;font-size:12px;color:#666;margin-bottom:3px;font-weight:500}
+.ctrl input{width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:6px;font-size:14px;background:#fff}
+.ctrl input:focus{outline:none;border-color:#534AB7}
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0}
+.m{background:#fff;border:1px solid #eee;border-radius:8px;padding:12px 14px}
+.m .l{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.3px}
+.m .v{font-size:22px;font-weight:600;margin-top:4px}
+.m .v.red{color:#A32D2D}.m .v.green{color:#2E7D32}.m .v.amber{color:#854F0B}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+.tbl th{background:#f2f1ec;font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid #ddd;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:#555}
+.tbl td{padding:8px 10px;border-bottom:1px solid #eee}
+.tbl tr.hl{background:#FFF8E1}
+.tbl tr.dg{background:#FFEBEE}
+.tbl td.n{text-align:right;font-variant-numeric:tabular-nums}
+.note{font-size:13px;color:#555;margin:14px 0;padding:12px 14px;border-left:3px solid #534AB7;background:#f5f4f0;border-radius:0 8px 8px 0}
+.note strong{color:#1F4E79}
+.bd{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.bd.ok{background:#E8F5E9;color:#2E7D32}
+.bd.ko{background:#FFEBEE;color:#C62828}
+.bd.wn{background:#FFF8E1;color:#854F0B}
+.sep{border:none;border-top:1px solid #eee;margin:24px 0}
+.sec{font-size:15px;font-weight:600;color:#2E75B6;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Simulatore formula Terna art. 6.2</h1>
+<div class="sub">Sinistro n. 02-26-API25 | Polizza API2500161 | Sito Imerys Domodossola (20 MW)</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab(0)">Formula art. 6.2</button>
+  <button class="tab" onclick="showTab(1)">Scenari controfattuali</button>
+  <button class="tab" onclick="showTab(2)">Conteggio penale</button>
+</div>
+
+<div class="panel active" id="p0">
+<div class="sec">Calcolo potenza prelevata (Pp) con parametri modificabili</div>
+<div class="row">
+  <div class="ctrl"><label>Pbmi (MW medi mese)</label><input type="number" id="pbmi" value="18.45" step="0.01"></div>
+  <div class="ctrl"><label>Plungo periodo (MW)</label><input type="number" id="plp" value="20" step="0.1"></div>
+  <div class="ctrl"><label>Pc (pot. contrattuale MW)</label><input type="number" id="pc" value="20" step="0.1"></div>
+</div>
+<div class="row">
+  <div class="ctrl"><label>Hmese (ore del mese)</label><input type="number" id="hm" value="744" step="1"></div>
+  <div class="ctrl"><label>Hmanutenzione (ore)</label><input type="number" id="hman" value="540" step="1"></div>
+  <div class="ctrl"><label>Hindisponibilita (ore)</label><input type="number" id="hind" value="0" step="1"></div>
+</div>
+<div class="row">
+  <div class="ctrl"><label>Pmin (pot. minima MW)</label><input type="number" id="pmin" value="20" step="0.1"></div>
+  <div class="ctrl"><label>Remunerazione piena</label><input type="number" id="remfull" value="169445" step="1"></div>
+</div>
+<div class="mg" id="r0"></div>
+<div class="note" id="n0"></div>
+<hr class="sep">
+<div class="sec">Confronto rapido: 540 vs 543 ore (maggio 2025)</div>
+<div class="mg" id="c0"></div>
+</div>
+
+<div class="panel" id="p1">
+<div class="sec">Dicembre 2025: cosa sarebbe successo con 288 ore?</div>
+<div class="row">
+  <div class="ctrl"><label>Pbmi dicembre (MW medi)</label><input type="number" id="d_pbmi" value="4.04" step="0.01"></div>
+  <div class="ctrl"><label>Hmese dicembre</label><input type="number" id="d_hm" value="744" step="1"></div>
+  <div class="ctrl"><label>Ore guasto inserite (reale)</label><input type="number" id="d_hr" value="198" step="1"></div>
+</div>
+<div class="row">
+  <div class="ctrl"><label>Ore guasto corrette</label><input type="number" id="d_hc" value="288" step="1"></div>
+  <div class="ctrl"><label>Hmanutenzione dicembre</label><input type="number" id="d_hman" value="0" step="1"></div>
+  <div class="ctrl"><label>Pmin dicembre (MW)</label><input type="number" id="d_pmin" value="18" step="0.1"></div>
+</div>
+<div class="mg" id="r1"></div>
+<div class="note" id="n1"></div>
+<hr class="sep">
+<div class="sec">Maggio 2025: 540 vs 543 ore manutenzione</div>
+<div class="row">
+  <div class="ctrl"><label>Pbmi maggio (MW medi)</label><input type="number" id="m_pbmi" value="18.45" step="0.01"></div>
+  <div class="ctrl"><label>Hmese maggio</label><input type="number" id="m_hm" value="744" step="1"></div>
+  <div class="ctrl"><label>Hindisponibilita maggio</label><input type="number" id="m_hind" value="0" step="1"></div>
+</div>
+<div class="mg" id="r1b"></div>
+</div>
+
+<div class="panel" id="p2">
+<div class="sec">Conteggio mensilitA irregolari 2025 e trigger penale</div>
+<table class="tbl" id="pt"></table>
+<div class="mg" id="r2"></div>
+<div class="note" id="n2"></div>
+<hr class="sep">
+<div class="sec">Cosa cambia se maggio fosse regolare?</div>
+<div class="mg" id="r2b"></div>
+<div class="note" id="n2b"></div>
+</div>
+</div>
+
+<script>
+function showTab(n){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+}
+function pp(pbmi,plp,pc,hm,hman,hind){
+  var d=hm-hman-hind;
+  return d<=0?0:pbmi*(plp/pc)*(hm/d);
+}
+function f(v,d){return v.toFixed(d||2)}
+function eur(v){return '\u20ac '+Math.round(v).toLocaleString('it-IT')}
+function pct(v){return f(v*100)+'%'}
+function bd(ok,t){return '<span class="bd '+(ok?'ok':'ko')+'">'+t+'</span>'}
+
+function u0(){
+  var g=function(id){return parseFloat(document.getElementById(id).value)||0};
+  var pbmi=g('pbmi'),plp=g('plp'),pc=g('pc'),hm=g('hm'),hman=g('hman'),hind=g('hind'),pmin=g('pmin'),rf=g('remfull');
+  var v=pp(pbmi,plp,pc,hm,hman,hind);
+  var r=pmin>0?v/pmin:0;
+  var c=r>=1?1:r;
+  var rem=rf*c;
+  var cls=r>=1?'green':r>=0.9?'amber':'red';
+  document.getElementById('r0').innerHTML=
+    '<div class="m"><div class="l">Pp (potenza prelevata)</div><div class="v">'+f(v)+' MW</div></div>'+
+    '<div class="m"><div class="l">Pp / Pmin</div><div class="v '+cls+'">'+pct(r)+'</div></div>'+
+    '<div class="m"><div class="l">Coefficiente riduzione</div><div class="v">'+f(c,4)+'</div></div>'+
+    '<div class="m"><div class="l">Remunerazione</div><div class="v">'+eur(rem)+'</div></div>'+
+    '<div class="m"><div class="l">Mese regolare?</div><div class="v">'+(r>=1?bd(true,'Regolare'):bd(false,'Irregolare'))+'</div></div>';
+  document.getElementById('n0').innerHTML='<strong>Formula art. 6.2:</strong> Pp = '+f(pbmi)+' \u00d7 ('+f(plp)+'/'+f(pc)+') \u00d7 '+hm+' / ('+hm+' \u2013 '+hman+' \u2013 '+hind+') = <strong>'+f(v)+' MW</strong>';
+  var v540=pp(pbmi,plp,pc,hm,540,hind),v543=pp(pbmi,plp,pc,hm,543,hind);
+  var r540=v540/pmin,r543=v543/pmin;
+  var rem540=rf*(r540>=1?1:r540),rem543=rf*(r543>=1?1:r543);
+  document.getElementById('c0').innerHTML=
+    '<div class="m"><div class="l">Con 540 ore (errore)</div><div class="v '+(r540>=1?'green':'red')+'">'+pct(r540)+'</div></div>'+
+    '<div class="m"><div class="l">Con 543 ore (corretto)</div><div class="v '+(r543>=1?'green':'red')+'">'+pct(r543)+'</div></div>'+
+    '<div class="m"><div class="l">Remunerazione 540</div><div class="v">'+eur(rem540)+'</div></div>'+
+    '<div class="m"><div class="l">Remunerazione 543</div><div class="v">'+eur(rem543)+'</div></div>'+
+    '<div class="m"><div class="l">Delta (danno)</div><div class="v red">'+eur(rem543-rem540)+'</div></div>';
+}
+
+function u1(){
+  var g=function(id){return parseFloat(document.getElementById(id).value)||0};
+  var pbmi=g('d_pbmi'),hm=g('d_hm'),hr=g('d_hr'),hc=g('d_hc'),hman=g('d_hman'),pmin=g('d_pmin');
+  var vr=pp(pbmi,20,20,hm,hman,hr);
+  var vc=pp(pbmi,20,20,hm,hman,hc);
+  var pr=vr/pmin,pc2=vc/pmin;
+  document.getElementById('r1').innerHTML=
+    '<div class="m"><div class="l">Pp reale ('+hr+' ore guasto)</div><div class="v red">'+pct(pr)+'</div></div>'+
+    '<div class="m"><div class="l">Pp corretto ('+hc+' ore guasto)</div><div class="v '+(pc2>=1?'green':pc2>=0.9?'amber':'red')+'">'+pct(pc2)+'</div></div>'+
+    '<div class="m"><div class="l">Mese reale</div><div class="v">'+bd(false,'Irregolare')+'</div></div>'+
+    '<div class="m"><div class="l">Mese corretto</div><div class="v">'+(pc2>=1?bd(true,'Regolare'):bd(false,'Ancora irregolare'))+'</div></div>';
+  var ip=pc2>=1?'A':'B';
+  document.getElementById('n1').innerHTML='<strong>Risultato:</strong> con '+hc+' ore, Pp = '+pct(pc2)+' '+(pc2>=1?'\u2265':'<')+' 100%. <strong>Ipotesi '+ip+'</strong> della v3.0.'+(pc2>=1?' Il mese sarebbe stato regolare: danno interamente imputabile a ORA.':' Il mese sarebbe stato comunque irregolare: danno ORA limitato alla differenza marginale.');
+
+  var mp=g('m_pbmi'),mh=g('m_hm'),mi=g('m_hind');
+  var v540=pp(mp,20,20,mh,540,mi),v543=pp(mp,20,20,mh,543,mi);
+  var r540=v540/20,r543=v543/20;
+  var rem=169445;
+  var rem540=rem*(r540>=1?1:r540),rem543=rem*(r543>=1?1:r543);
+  document.getElementById('r1b').innerHTML=
+    '<div class="m"><div class="l">Pp con 540 ore (errore)</div><div class="v '+(r540>=1?'green':'red')+'">'+pct(r540)+'</div></div>'+
+    '<div class="m"><div class="l">Pp con 543 ore (corretto)</div><div class="v '+(r543>=1?'green':'red')+'">'+pct(r543)+'</div></div>'+
+    '<div class="m"><div class="l">Remunerazione errore</div><div class="v">'+eur(rem540)+'</div></div>'+
+    '<div class="m"><div class="l">Remunerazione corretta</div><div class="v">'+eur(rem543)+'</div></div>'+
+    '<div class="m"><div class="l">Danno diretto maggio</div><div class="v red">'+eur(rem543-rem540)+'</div></div>';
+}
+
+function u2(){
+  var ms=[
+    {m:'Gennaio',p:100.25,c:'Regolare',o:false},
+    {m:'Febbraio',p:102.48,c:'Regolare',o:false},
+    {m:'Marzo',p:121.39,c:'Regolare',o:false},
+    {m:'Aprile',p:78.00,c:'Consumi insufficienti (a preventivo)',o:false},
+    {m:'Maggio',p:92.26,c:'Errore 540 vs 543 ore manutenzione',o:true},
+    {m:'Giugno',p:133.00,c:'Regolare',o:false},
+    {m:'Luglio',p:71.27,c:'Consumi bassi (a preventivo)',o:false},
+    {m:'Agosto',p:0,c:'Fermo sito (0 MW)',o:false,z:true},
+    {m:'Settembre',p:102.21,c:'Regolare',o:false},
+    {m:'Ottobre',p:100.43,c:'Regolare',o:false},
+    {m:'Novembre',p:100.31,c:'Regolare',o:false},
+    {m:'Dicembre',p:22.46,c:'Tardiva apertura guasto',o:true}
+  ];
+  var ir=0,trig=false,tm='';
+  var h='<thead><tr><th>Mese</th><th>% Pp</th><th>Stato</th><th>Cont.</th><th>Causa</th><th>ORA</th></tr></thead><tbody>';
+  ms.forEach(function(x){
+    var bad=x.p<100&&!x.z;
+    if(bad)ir++;
+    var cls=bad?(ir>3?'dg':'hl'):'';
+    var st=x.z?'<span class="bd wn">Fermo</span>':(bad?bd(false,'Irregolare'):bd(true,'Regolare'));
+    if(ir===4&&!trig){trig=true;tm=x.m;}
+    h+='<tr class="'+cls+'"><td>'+x.m+'</td><td class="n">'+x.p.toFixed(2)+'%</td><td>'+st+'</td><td class="n">'+(bad?ir+'\u00aa':'\u2014')+'</td><td>'+x.c+'</td><td>'+(x.o?'<strong>Si</strong>':'No')+'</td></tr>';
+  });
+  h+='</tbody>';
+  document.getElementById('pt').innerHTML=h;
+  var pen=trig?40000:0;
+  document.getElementById('r2').innerHTML=
+    '<div class="m"><div class="l">Irregolari totali</div><div class="v '+(ir>3?'red':'green')+'">'+ir+'</div></div>'+
+    '<div class="m"><div class="l">Soglia (art. 6.4)</div><div class="v">3</div></div>'+
+    '<div class="m"><div class="l">Penale scattata?</div><div class="v">'+(trig?bd(false,'Si \u2014 '+tm):bd(true,'No'))+'</div></div>'+
+    '<div class="m"><div class="l">Importo penale</div><div class="v '+(pen>0?'red':'green')+'">'+eur(pen)+'</div></div>';
+  document.getElementById('n2').innerHTML='<strong>Sequenza:</strong> 1\u00aa aprile (a preventivo) \u2192 2\u00aa luglio (a preventivo) \u2192 3\u00aa maggio (errore ORA) \u2192 <strong>4\u00aa dicembre (errore ORA) \u2192 penale \u20ac 40.000</strong>.';
+
+  document.getElementById('r2b').innerHTML=
+    '<div class="m"><div class="l">Senza errore maggio</div><div class="v">3 irregolari</div></div>'+
+    '<div class="m"><div class="l">Penale?</div><div class="v">'+bd(true,'No \u2014 entro soglia')+'</div></div>'+
+    '<div class="m"><div class="l">Senza entrambi gli errori ORA</div><div class="v green">2 irregolari</div></div>'+
+    '<div class="m"><div class="l">Penale?</div><div class="v">'+bd(true,'No')+'</div></div>';
+  document.getElementById('n2b').innerHTML='<strong>Punto-chiave per Stefanescu:</strong> se maggio fosse stato regolare, il totale sarebbe 3 (aprile + luglio + dicembre) = entro soglia. La penale non sarebbe scattata. L\u2019Assicurato puo argomentare: \u00aba dicembre credevo di avere solo 3 irregolari\u00bb. La prevedibilita della penale dipende dalla dimostrazione che ORA sapeva di maggio.';
+}
+
+document.querySelectorAll('#p0 input').forEach(function(i){i.addEventListener('input',u0)});
+document.querySelectorAll('#p1 input').forEach(function(i){i.addEventListener('input',u1)});
+u0();u1();u2();
+</script>
+</body>
+</html>
